@@ -1,0 +1,8 @@
+# Add a company
+curl -X POST -H "Content-Type: application/json" -d '{"name": "ComputerLine", "address": "123 Main St"}' 0.0.0.0:8080/addCompany
+
+###
+
+# Delete a company
+
+curl -X DELETE -H "Content-Type: application/json" -d '{"id": "1"}' 0.0.0.0:8080/deleteCompany

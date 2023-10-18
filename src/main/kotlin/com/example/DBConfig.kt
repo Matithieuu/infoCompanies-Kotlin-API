@@ -1,6 +1,6 @@
 package com.example
 
-import com.example.data.Company
+import com.example.data.Companies
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -22,6 +22,6 @@ fun initDB() {
 
 private fun createTables() {
     transaction {
-        SchemaUtils.create(Company)
+        SchemaUtils.create(Companies)
     }
 }
