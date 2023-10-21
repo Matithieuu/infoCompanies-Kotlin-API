@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
 fun initDB() {
-    val configPath = "/home/mathieu/IdeaProjects/infoCompanies-API/src/main/resources/dbconfig.properties"
+    val configPath = "src/main/resources/dbconfig.properties"
     val dbConfig = HikariConfig(configPath)
 
     val dataSource = HikariDataSource(dbConfig)

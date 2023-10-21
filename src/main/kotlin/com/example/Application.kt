@@ -1,27 +1,24 @@
 package com.example
 
-import com.example.data.UserInfo
-import com.example.data.UserSession
+
 import com.example.plugins.*
+import com.example.routing.configureCompanyRoutes
+import com.example.routing.configureOAuthRoutes
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.http.headers
-import io.ktor.serialization.gson.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.request.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.server.plugins.cors.routing.*
+
 
 fun main() {
+    System.setProperty("io.ktor.development", "true")
+
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
             .start(wait = true)
 }
@@ -32,36 +29,32 @@ val applicationHttpClient = HttpClient(CIO) {
     }
 }
 
-val redirects = mutableMapOf<String, String>()
-
 fun Application.module(httpClient: HttpClient = applicationHttpClient) {
+    install(CORS) {
+        anyHost()
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Patch)
+        allowMethod(HttpMethod.Post)
+
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
+    }
     initDB()
 
-    configureSecurity(httpClient)
-
-    configureRouting2(httpClient)
-
-    routing {
-        get("/{path}") {
-            val userSession: UserSession? = call.sessions.get()
-            if (userSession != null) {
-                val userInfo: UserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer ${userSession.token}")
-                    }
-                }.body()
-                call.respondText("Hello, ${userInfo.name}!")
-            } else {
-                val redirectUrl = URLBuilder("http://0.0.0.0:8080/login").run {
-                    parameters.append("redirectUrl", call.request.uri)
-                    build()
-                }
-                call.respondRedirect(redirectUrl)
-            }
+    install(StatusPages) {
+        status(HttpStatusCode.NotFound) { call, status ->
+            call.respondText(text = "404: Page Not Found", status = status)
         }
     }
 
-    configureRouting()
+    configureSecurity(httpClient)
+
+    configureOAuthRoutes(httpClient)
+
+    configureCompanyRoutes(httpClient)
 
 }
 
