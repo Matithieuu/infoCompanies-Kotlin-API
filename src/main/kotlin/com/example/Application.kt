@@ -55,8 +55,6 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
     configureOAuthRoutes(httpClient)
 
     configureCompanyRoutes(httpClient)
-
-    println("VARIABLE ENVIRONMENT " + System.getenv())
 }
 
 

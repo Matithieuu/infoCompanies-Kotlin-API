@@ -46,7 +46,9 @@ fun Application.configureOAuthRoutes(httpClient: HttpClient = applicationHttpCli
                 }.body()
                 call.respondText("Hello, $userInfo!")
             } else {
-                val redirectUrl = URLBuilder("http://127.0.0.1:8080/login").run {
+                println("Pas de session")
+                println()
+                val redirectUrl = URLBuilder("http://127.0.0.1:8080/").run {
                     parameters.append("redirectUrl", call.request.uri)
                     build()
                 }

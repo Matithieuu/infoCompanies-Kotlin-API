@@ -17,7 +17,7 @@ fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient
 
     install(Authentication) {
         oauth("auth-oauth-google") {
-            urlProvider = { "http://127.0.0.1:8080/me" }
+            urlProvider = { "http://127.0.0.1:8080/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
