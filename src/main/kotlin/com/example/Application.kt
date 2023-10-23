@@ -19,7 +19,7 @@ import io.ktor.server.plugins.cors.routing.*
 fun main() {
     System.setProperty("io.ktor.development", "true")
 
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = 8080, host = "127.0.0.1", module = Application::module)
             .start(wait = true)
 }
 
@@ -56,6 +56,7 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
 
     configureCompanyRoutes(httpClient)
 
+    println("VARIABLE ENVIRONMENT " + System.getenv())
 }
 
 

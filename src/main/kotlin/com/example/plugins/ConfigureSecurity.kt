@@ -10,7 +10,6 @@ import io.ktor.server.sessions.*
 
 val redirects = mutableMapOf<String, String>()
 
-
 fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient) {
     install(Sessions) {
         cookie<UserSession>("user_session")
@@ -18,7 +17,7 @@ fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient
 
     install(Authentication) {
         oauth("auth-oauth-google") {
-            urlProvider = { "http://127.0.0.1:8080/callback" }
+            urlProvider = { "http://127.0.0.1:8080/me" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
