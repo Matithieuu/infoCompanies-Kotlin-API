@@ -2,17 +2,23 @@ package com.example.plugins
 
 import com.example.applicationHttpClient
 import com.example.data.UserSession
+import com.example.data.UserSessionOAuth
 import io.ktor.client.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 
 val redirects = mutableMapOf<String, String>()
 
 fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient) {
     install(Sessions) {
-        cookie<UserSession>("user_session")
+        cookie<UserSessionOAuth>("user_session-oauth")
+        cookie<UserSession>("user_session") {
+            cookie.path = "/"
+            cookie.maxAgeInSeconds = 60 * 60 * 24 * 365
+        }
     }
 
     install(Authentication) {
@@ -34,6 +40,19 @@ fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient
                 )
             }
             client = httpClient
+        }
+
+        session<UserSession>("auth-session") {
+            validate { session ->
+                if(session.name.startsWith("mat")) {
+                    session
+                } else {
+                    null
+                }
+            }
+            challenge {
+                call.respondRedirect("http://localhost:5173/login")
+            }
         }
     }
 }

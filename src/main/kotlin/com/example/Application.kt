@@ -3,14 +3,19 @@ package com.example
 
 import com.example.plugins.*
 import com.example.routing.configureCompanyRoutes
+import com.example.routing.configureLoginRoutes
 import com.example.routing.configureOAuthRoutes
+import com.example.routing.configurePersonalRoutes
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.http.*
+import io.ktor.serialization.gson.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.plugins.cors.routing.*
@@ -32,6 +37,9 @@ val applicationHttpClient = HttpClient(CIO) {
 fun Application.module(httpClient: HttpClient = applicationHttpClient) {
     install(CORS) {
         anyHost()
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.AccessControlAllowOrigin)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
@@ -42,6 +50,10 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
         allowCredentials = true
         allowNonSimpleContentTypes = true
     }
+    install(ContentNegotiation) {
+        gson ()
+    }
+
     initDB()
 
     install(StatusPages) {
@@ -53,6 +65,10 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
     configureSecurity(httpClient)
 
     configureOAuthRoutes(httpClient)
+
+    configureLoginRoutes()
+
+    configurePersonalRoutes(httpClient)
 
     configureCompanyRoutes(httpClient)
 }
