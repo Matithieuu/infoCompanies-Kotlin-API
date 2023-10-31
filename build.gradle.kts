@@ -10,15 +10,26 @@ plugins {
     id("io.ktor.plugin") version "2.3.5"
 }
 
+sourceSets {
+    main {
+        resources {
+            setSrcDirs(listOf("src/main/resources/"))
+        }
+    }
+}
+
 group = "com.example"
 version = "0.0.1"
 
 application {
     mainClass.set("com.example.ApplicationKt")
 
+
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
+
+
 
 repositories {
     mavenCentral()
@@ -43,6 +54,8 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
 
     implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-server-sessions:$ktor_version")
     implementation("io.ktor:ktor-server-html-builder:$ktor_version")
     implementation("io.ktor:ktor-client-core:$ktor_version")

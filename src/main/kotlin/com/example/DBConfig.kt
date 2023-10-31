@@ -17,8 +17,15 @@ fun initDB() {
     val dataSource = HikariDataSource(dbConfig)
     Database.connect(dataSource)
 
+
     createTables()
     LoggerFactory.getLogger(Application::class.simpleName).info("Initialized Database")
+
+    Runtime.getRuntime().addShutdownHook(object : Thread() {
+        override fun run() { // do something
+            dataSource.close()
+        }
+    })
 }
 
 private fun createTables() {
@@ -26,4 +33,7 @@ private fun createTables() {
         SchemaUtils.create(Companies)
         SchemaUtils.create(Users)
     }
+
+
 }
+

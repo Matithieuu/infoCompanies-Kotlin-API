@@ -16,20 +16,10 @@ import io.ktor.server.sessions.*
 
 fun Application.configureCompanyRoutes(httpClient: HttpClient = applicationHttpClient) {
     routing {
-        authenticate("auth-oauth-google") {
+        authenticate("auth_jwt") {
             get("getAllCompanies") {
-                val userSessionOAuth: UserSessionOAuth? = call.sessions.get()
-                if (userSessionOAuth != null) {
-                    val textToDisplay = DAOCompany.getAllCompanies()
-                    call.respondText(textToDisplay.toString())
-
-                } else {
-                    val redirectUrl = URLBuilder("http://127.0.0.1:8080/login").run {
-                        parameters.append("redirectUrl", call.request.uri)
-                        build()
-                    }
-                    call.respondRedirect(redirectUrl)
-                }
+                val textToDisplay = DAOCompany.getAllCompanies()
+                call.respondText(textToDisplay.toString())
             }
 
             get("Company/{id}") {

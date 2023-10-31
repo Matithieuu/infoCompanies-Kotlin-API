@@ -1,10 +1,7 @@
 package com.example.routing
 
 import com.example.applicationHttpClient
-import com.example.data.UserInfo
-import com.example.data.UserSession
 import com.example.data.UserSessionOAuth
-import com.example.plugins.redirects
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.http.*
@@ -27,15 +24,16 @@ fun Application.configureOAuthRoutes(httpClient: HttpClient = applicationHttpCli
             get("/callback") {
                 val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
                 call.sessions.set(UserSessionOAuth(principal!!.state!!, principal.accessToken))
-                call.respondRedirect("http://localhost:5173/dashboard")
-                //val redirect = redirects[principal.state!!]
-                //call.respondRedirect(redirect!!)
+                println("Token : ${principal.accessToken}")
+                call.respondRedirect("http://127.0.0.1:8080/hello")
+//                val redirect = redirects[principal.state!!]
+//                call.respondRedirect(redirect!!)
             }
         }
 
         get("/logout") {
             call.sessions.clear<UserSessionOAuth>()
-            call.sessions.clear<UserSession>()
+            call.respondRedirect("http://localhost:5173/login")
         }
     }
 }
