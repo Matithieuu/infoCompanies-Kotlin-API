@@ -33,7 +33,5 @@ private fun createTables() {
         SchemaUtils.create(Companies)
         SchemaUtils.create(Users)
     }
-
-
 }
 

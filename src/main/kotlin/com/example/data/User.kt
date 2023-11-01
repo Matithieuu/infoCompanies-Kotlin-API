@@ -9,7 +9,8 @@ data class User(
     val email: String,
     val password: String,
     val address: String,
-    val phone: String
+    val phone: String,
+    val refreshToken : String
     )
 object Users : Table() {
     val id = integer("id").autoIncrement()
@@ -18,6 +19,7 @@ object Users : Table() {
     val password = varchar("password", 255)
     val address = varchar("address", 255)
     val phone = varchar("phone", 255)
+    val refreshToken = varchar("refreshToken", 255)
 
     override val primaryKey = PrimaryKey(id)
 }

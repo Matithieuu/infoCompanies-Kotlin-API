@@ -30,7 +30,7 @@ fun Application.configureLoginRoutes() {
         val subject = "Account Login API" //The subject of the token
 
         val algorithm = Algorithm.HMAC256(secret)
-        val expiresAt = Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10))
+        val expiresAt = Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(10))
 
         return JWT.create()
             .withAudience(audience)
@@ -38,6 +38,26 @@ fun Application.configureLoginRoutes() {
             .withClaim("username", username)
             .withExpiresAt(expiresAt)
             .sign(algorithm)
+    }
+
+    fun Application.generateRefreshToken(email: String): String {
+        val refreshTokenExpirationMillis = TimeUnit.DAYS.toMillis(10)
+        val secret = "your-refresh-token-secret"  // Utilisez une clé secrète différente pour les refresh tokens
+        val issuer = "http://0.0.0.0:5173" //The issuer of the token (React Native App)
+
+
+        val algorithm = Algorithm.HMAC256(secret)
+        val expiresAt = Date(System.currentTimeMillis() + refreshTokenExpirationMillis)
+
+        val refreshToken = JWT.create()
+            .withSubject("RefreshToken")
+            .withIssuer(issuer)
+            .withClaim("email", email)
+            .withExpiresAt(expiresAt)
+            .sign(algorithm)
+
+        DAOUser.saveRefreshToken(email, refreshToken)
+        return refreshToken
     }
 
     val failedLoginAttempts = mutableMapOf<String, Int>()
@@ -68,30 +88,44 @@ fun Application.configureLoginRoutes() {
         post("/login") {
 
             val clientIP = call.getClientIP()
-
             if (clientIP.isBlocked()) {
                 call.respond(HttpStatusCode.Forbidden, "IP address blocked. Please try again later.")
                 return@post
             }
-            val loginRequest = call.receive<LoginRequest>()
 
+            val loginRequest = call.receive<LoginRequest>()
             val user = DAOUser.getUserByEmail(loginRequest.email)
-            if (user != null ) {
+
+            if ((user != null) && (user.password == loginRequest.password)) {
                 failedLoginAttempts.remove(clientIP)
                 println("User found: $user")
                 val token = application.generateToken(user.toString())
-                call.respond(HttpStatusCode.OK, LoginResponse(token))
+                val refreshToken = application.generateRefreshToken(user.email)
+                call.respond(HttpStatusCode.OK, LoginResponse(token, refreshToken))
+
             } else {
                 val attempts = failedLoginAttempts.incrementAndGet(clientIP)
                 if (attempts >= MAX_LOGIN_ATTEMPTS) {
                     blockIP(clientIP)
                 }
-
                 call.respond(HttpStatusCode.Unauthorized, "Username or password incorrect.")
+            }
+        }
+
+        post("/refresh-token") {
+            val refreshRequest = call.receive<RefreshTokenRequest>()
+            val email = DAOUser.getEmailByRefreshToken(refreshRequest.refreshToken)
+            if (email != null) {
+                val newToken = application.generateRefreshToken(email)
+                call.respond(HttpStatusCode.OK, TokenResponse(newToken))
+            } else {
+                call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
             }
         }
     }
 }
 
 data class LoginRequest(val email: String, val password: String)
-data class LoginResponse(val token: String)
+data class LoginResponse(val token: String, val refreshToken: String)
+data class RefreshTokenRequest(val refreshToken: String)
+data class TokenResponse(val token: String)

@@ -14,5 +14,4 @@ object Companies : Table() {
     val address = varchar("address", 255)
 
     override val primaryKey = PrimaryKey(id)
-
 }

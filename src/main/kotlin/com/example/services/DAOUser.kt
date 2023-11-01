@@ -43,10 +43,30 @@ class DAOUser  {
 
         fun getUserByEmail(email: String) = transaction {
             if (Users.select { Users.email eq email }.count() > 0) {
-                Users.select { Users.email eq email }.map { it[Users.email] ; it[Users.password] }
+                Users.select { Users.email eq email }.map {
+                    User(
+                        it[Users.id],
+                        it[Users.name],
+                        it[Users.email],
+                        it[Users.password],
+                        it[Users.address],
+                        it[Users.phone],
+                        it[Users.refreshToken]
+                    )
+                }.first()
             } else {
-                null
+                return@transaction null
             }
+        }
+
+        fun saveRefreshToken(email: String, refreshToken: String) = transaction {
+            Users.update({ Users.email eq email }) {
+                it[Users.refreshToken] = refreshToken
+            }
+        }
+
+        fun getEmailByRefreshToken(refreshToken: String) = transaction {
+            Users.select { Users.refreshToken eq refreshToken }.map { it[Users.email] }.firstOrNull()
         }
     }
 }
