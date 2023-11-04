@@ -12,15 +12,12 @@ import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
-import jdk.jfr.Enabled
-
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "127.0.0.1", module = Application::module)
@@ -83,7 +80,7 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
 
     configurePersonalRoutes()
 
-    configureCompanyRoutes(httpClient)
+    configureCompanyRoutes()
 
 
 }

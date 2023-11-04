@@ -1,18 +1,19 @@
 package com.example.routing
 
 import com.example.applicationHttpClient
+import com.example.data.UserInfo
 import com.example.data.UserSessionOAuth
+import com.example.services.DAOUser.Companion.findOrCreateUser
+import com.example.utils.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.sessions.*
 import io.ktor.client.request.*
-
 
 fun Application.configureOAuthRoutes(httpClient: HttpClient = applicationHttpClient) {
     routing {
@@ -23,17 +24,38 @@ fun Application.configureOAuthRoutes(httpClient: HttpClient = applicationHttpCli
 
             get("/callback") {
                 val principal: OAuthAccessTokenResponse.OAuth2? = call.principal()
-                call.sessions.set(UserSessionOAuth(principal!!.state!!, principal.accessToken))
-                println("Token : ${principal.accessToken}")
-                call.respondRedirect("http://127.0.0.1:8080/hello")
-//                val redirect = redirects[principal.state!!]
-//                call.respondRedirect(redirect!!)
-            }
-        }
+                if (principal != null) {
+                    val userInfo: UserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
+                        headers {
+                            append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
+                        }
+                    }.body()
 
-        get("/logout") {
-            call.sessions.clear<UserSessionOAuth>()
-            call.respondRedirect("http://localhost:5173/login")
+                    findOrCreateUser(userInfo)
+
+                    call.sessions.set(
+                        UserSessionOAuth(
+                            state = principal.state!!,
+                            token = principal.accessToken
+                        )
+                    )
+                    call.response.cookies.append(Cookie("AuthToken", generateRefreshToken(userInfo.email),
+                        secure = false,
+                        httpOnly = true,
+                        domain = "http://localhost:5173/",
+                        ))
+
+                    call.respondRedirect("http://localhost:5173/dashboard")
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "Échec de l'authentification")
+                }
+            }
+
+
+            get("/logout") {
+                call.sessions.clear<UserSessionOAuth>()
+                call.respondRedirect("http://localhost:5173/login")
+            }
         }
     }
 }

@@ -49,9 +49,13 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
+
     implementation("com.h2database:h2:$h2_version")
     implementation("com.zaxxer:HikariCP:4.0.3")
-    implementation("mysql:mysql-connector-java:8.0.33")
+    //implementation("mysql:mysql-connector-java:8.0.33")
+    implementation ("org.postgresql:postgresql:42.6.0") // JDBC Connector for PostgreSQL
+
 
     implementation("io.ktor:ktor-server-auth:$ktor_version")
     implementation("io.ktor:ktor-server-auth:$ktor_version")

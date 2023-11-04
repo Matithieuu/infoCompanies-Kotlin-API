@@ -1,6 +1,7 @@
 package com.example.services
 
 import com.example.data.User
+import com.example.data.UserInfo
 import com.example.data.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -13,13 +14,20 @@ class DAOUser  {
             Users.selectAll().map { it[Users.name] }
         }
 
-        fun addUser(name: String, email: String, password: String, address: String, phone: String) = transaction {
-            Users.insert {
-                it[Users.name] = name
-                it[Users.email] = email
-                it[Users.password] = password
-                it[Users.address] = address
-                it[Users.phone] = phone
+        fun findOrCreateUser(userInfo: UserInfo) = transaction {
+            val user = getUserByEmail(userInfo.email)
+            if (user == null) {
+                val id = Users.insert {
+                    it[Users.name] = userInfo.name
+                    it[Users.email] = userInfo.email
+                    it[Users.password] = ""
+                    it[Users.address] = ""
+                    it[Users.phone] = ""
+                    it[Users.refreshToken] = ""
+                } get Users.id
+                User(id, userInfo.name, userInfo.email, "", "", "", "")
+            } else {
+                user
             }
         }
 

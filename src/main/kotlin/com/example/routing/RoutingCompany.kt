@@ -1,45 +1,44 @@
 package com.example.routing
 
-import com.example.applicationHttpClient
-import com.example.data.Company
-import com.example.data.UserSessionOAuth
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import com.example.services.DAOCompany
-import io.ktor.client.*
 import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.sessions.*
 
-
-fun Application.configureCompanyRoutes(httpClient: HttpClient = applicationHttpClient) {
+fun Application.configureCompanyRoutes() {
     routing {
-        authenticate("auth_jwt") {
-            get("getAllCompanies") {
-                val textToDisplay = DAOCompany.getAllCompanies()
+        //authenticate("auth_jwt") {
+            get("Company/{siren}") {
+                val siren = call.parameters["siren"]
+                val textToDisplay = DAOCompany.getCompanyBySiren(siren!!)
+                println(textToDisplay)
                 call.respondText(textToDisplay.toString())
             }
 
-            get("Company/{id}") {
-                val id = call.parameters["id"]?.toIntOrNull()
-                val textToDisplay = DAOCompany.getCompanyById(id!!)
+            get ("SearchCompany/{search}") {
+                val search = call.parameters["search"]
+                val textToDisplay = DAOCompany.get10CompaniesBySearching(search!!)
+                println(textToDisplay)
                 call.respondText(textToDisplay.toString())
             }
 
-            post("addCompany") {
-                print("Requete reçue")
-                val companyRequest = call.receive<Company>()
-                DAOCompany.addCompany(companyRequest.name, companyRequest.address)
-                call.respondText("Company added ! Name : ${companyRequest.name} Address : ${companyRequest.address}")
-            }
+            get("SortCompany/{sortedOptions}") {
+                val query = call.request.queryParameters["sortedOptions"]
+                val regEx = Regex("[^A-Za-z0-9 ]")
+                val searchKeyWord = regEx.replace(query!!, "")
 
-            delete("deleteCompany/{id}") {
-                val id = call.parameters["id"]?.toIntOrNull()
-                DAOCompany.deleteCompany(id!!)
-                call.respondText("Company deleted !")
+                // Assuming sortedOptions is a string like "region:Languedoc-Roussillon-Midi-Pyrénées,ville:OLARGUES"
+
+                val optionsMap = searchKeyWord.split(",").associate {
+                    it.split(":").let { pair ->
+                        pair.first() to pair.last()
+                    }
+                }
+
+                val companies = DAOCompany.getCompaniesBySearchingOptions(optionsMap)
+                call.respondText(companies.toString(), ContentType.Text.Plain)
             }
-        }
+        //}
     }
 }

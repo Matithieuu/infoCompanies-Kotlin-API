@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 fun initDB() {
     val configPath = "src/main/resources/dbconfig.properties"
     val dbConfig = HikariConfig(configPath)
+    dbConfig.jdbcUrl = "jdbc:postgresql://localhost:5432/postgres"
 
     val dataSource = HikariDataSource(dbConfig)
     Database.connect(dataSource)

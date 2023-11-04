@@ -34,10 +34,13 @@ fun Application.configureSecurity(httpClient: HttpClient = applicationHttpClient
                 .withAudience(audience)
                 .withIssuer(issuer)
                 .build())
+
             validate { credential ->
                 val username = credential.payload.getClaim("username").asString()
+                val email = credential.payload.getClaim("email").asString()
                 println("User connecting: $username")
-                if (username != null) {
+                println("Email connecting: $email")
+                if (username != null || email != null) {
                     JWTPrincipal(credential.payload)
                 } else {
                     null
