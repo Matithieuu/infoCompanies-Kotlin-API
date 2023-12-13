@@ -3,6 +3,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val exposed_version: String by project
 val h2_version: String by project
+val stripe_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -55,6 +56,8 @@ dependencies {
     implementation("com.zaxxer:HikariCP:4.0.3")
     //implementation("mysql:mysql-connector-java:8.0.33")
     implementation ("org.postgresql:postgresql:42.6.0") // JDBC Connector for PostgreSQL
+
+    implementation("com.stripe:stripe-java:$stripe_version")
 
 
     implementation("io.ktor:ktor-server-auth:$ktor_version")
