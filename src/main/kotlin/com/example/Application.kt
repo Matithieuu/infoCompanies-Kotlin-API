@@ -2,8 +2,10 @@ package com.example
 
 
 import com.example.plugins.configureSecurity
-import com.example.routing.*
-import com.stripe.Stripe
+import com.example.routing.configureCompanyRoutes
+import com.example.routing.configureLoginRoutes
+import com.example.routing.configureOAuthRoutes
+import com.example.routing.configurePersonalRoutes
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.http.*
@@ -70,20 +72,15 @@ fun Application.module(httpClient: HttpClient = applicationHttpClient) {
         }
     }
 
-    val stripeApiKey = "sk_test_51OMa7QKjCboMtBPji8gnW9Us60F7iDnMTh50lQoRXsMN5Fm19kF3sXOxB5uXNPEe250MAmnfgLLc5oOYtlRNfYpe00ukE5BD1d"
-    Stripe.apiKey = stripeApiKey
+    configureSecurity(httpClient)
 
-//    configureSecurity(httpClient)
-//
-//    configureOAuthRoutes(httpClient)
-//
-//    configureLoginRoutes()
-//
-//    configurePersonalRoutes()
-//
-//    configureCompanyRoutes()
+    configureOAuthRoutes(httpClient)
 
-    configureRoutingStripe()
+    configureLoginRoutes()
+
+    configurePersonalRoutes()
+
+    configureCompanyRoutes()
 
 
 }

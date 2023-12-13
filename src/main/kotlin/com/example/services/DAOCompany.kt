@@ -76,18 +76,7 @@ class DAOCompany {
                 companyEntity.CA3,
                 companyEntity.resultat3,
 
-                companyEntity.secteurActivite,
-                companyEntity.phone,
-                companyEntity.website,
-                companyEntity.reviews,
-                companyEntity.schedule,
-                companyEntity.instagram,
-                companyEntity.facebook,
-                companyEntity.twitter,
-                companyEntity.linkedin,
-                companyEntity.youtube,
-                companyEntity.email,
-                companyEntity.dateOfScrapping,
+                companyEntity.secteurActivite
             )
         }
 
@@ -105,7 +94,7 @@ class DAOCompany {
                 }
         }
 
-        fun getCompaniesBySearchingOptions(params: Map<String, String>, page: Int, pageSize: Int = 10): Pair<List<Company>, Long> = transaction {
+        fun getCompaniesBySearchingOptions(params: Map<String, String>): List<Company> = transaction {
             // Start with a base query
             var query = Companies.selectAll()
 
@@ -123,25 +112,10 @@ class DAOCompany {
                 }
             }
 
-            // Count total available records
-            val totalRecords = query.count()
-
-            // Calculate total pages
-            val totalPages = if ((totalRecords % pageSize).toInt() == 0) {
-                totalRecords / pageSize
-            } else {
-                totalRecords / pageSize + 1
+            query.limit(10).map { row ->
+                transformEntityToCompany(CompanyEntity.wrapRow(row))
             }
-
-            // Apply limit and offset for pagination
-            val companies = query
-                .limit(pageSize, ((page - 1) * pageSize).toLong())
-                .map { row ->
-                    transformEntityToCompany(CompanyEntity.wrapRow(row))
-                }
-
-            // Return the list of companies and the total number of pages
-            Pair(companies, totalPages)
+            // A faire : Faire pages par pages. Faire un count pour savoir combien de pages il y a et faire un offset en fonction de la page.
         }
     }
 }
