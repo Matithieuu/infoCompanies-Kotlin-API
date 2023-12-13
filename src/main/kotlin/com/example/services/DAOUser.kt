@@ -1,8 +1,6 @@
 package com.example.services
 
-import com.example.data.User
-import com.example.data.UserInfo
-import com.example.data.Users
+import com.example.data.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -10,38 +8,59 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class DAOUser  {
 
     companion object {
-        fun getAllUsers() = transaction {
-            Users.selectAll().map { it[Users.name] }
+
+        private fun transformEntityToUser(userEntity: UserEntity): User {
+            return User(
+                userEntity.id.value,
+                userEntity.name,
+                userEntity.email,
+                userEntity.password,
+                userEntity.address,
+                userEntity.phone,
+                userEntity.refreshToken
+            )
         }
 
-        fun findOrCreateUser(userInfo: UserInfo) = transaction {
-            val user = getUserByEmail(userInfo.email)
-            if (user == null) {
-                val id = Users.insert {
-                    it[Users.name] = userInfo.name
-                    it[Users.email] = userInfo.email
-                    it[Users.password] = ""
-                    it[Users.address] = ""
-                    it[Users.phone] = ""
-                    it[Users.refreshToken] = ""
-                } get Users.id
-                User(id, userInfo.name, userInfo.email, "", "", "", "")
-            } else {
-                user
+       fun getAllUsers(): List<User> = transaction {
+            UserEntity.all().map { userEntity ->
+                transformEntityToUser(userEntity)
             }
         }
 
-        fun getUserById(id: Int) = transaction {
-            Users.select { Users.id eq id }.map { it[Users.name] }
+       fun findOrCreateUser(user: UserInfo): User = transaction {
+            val userEntity = UserEntity.find { Users.email eq user.email }.firstOrNull()
+            if (userEntity == null) {
+                val newUserEntity = UserEntity.new {
+                    this.name = name
+                    this.email = email
+                    this.password = password
+                    this.address = address
+                    this.phone = phone
+                    this.refreshToken = refreshToken
+                }
+                transformEntityToUser(newUserEntity)
+            } else {
+                transformEntityToUser(userEntity)
+            }
         }
 
-        fun updateUser(id: Int, name: String, email: String, password: String, address: String, phone: String) = transaction {
-            Users.update({ Users.id eq id }) {
-                it[Users.name] = name
-                it[Users.email] = email
-                it[Users.password] = password
-                it[Users.address] = address
-                it[Users.phone] = phone
+        fun getUserById(user: User) : User? = transaction {
+            val userEntity = UserEntity.find { Users.id eq user.id }.firstOrNull()
+            if (userEntity == null) {
+                return@transaction null
+            } else {
+                transformEntityToUser(userEntity)
+            }
+        }
+
+        fun updateUser(user: User) = transaction {
+            Users.update({ Users.id eq user.id }) {
+                it[name] = user.name
+                it[email] = user.email
+                it[password] = user.password
+                it[address] = user.address
+                it[phone] = user.phone
+                it[refreshToken] = user.refreshToken
             }
         }
 
@@ -49,21 +68,9 @@ class DAOUser  {
             Users.deleteWhere { Users.id eq id }
         }
 
-        fun getUserByEmail(email: String) = transaction {
-            if (Users.select { Users.email eq email }.count() > 0) {
-                Users.select { Users.email eq email }.map {
-                    User(
-                        it[Users.id],
-                        it[Users.name],
-                        it[Users.email],
-                        it[Users.password],
-                        it[Users.address],
-                        it[Users.phone],
-                        it[Users.refreshToken]
-                    )
-                }.first()
-            } else {
-                return@transaction null
+        fun getUserByEmail(email: String): User? = transaction {
+            UserEntity.find { Users.email eq email }.firstOrNull()?.let { userEntity ->
+                transformEntityToUser(userEntity)
             }
         }
 
