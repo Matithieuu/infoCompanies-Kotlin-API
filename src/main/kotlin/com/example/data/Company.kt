@@ -70,6 +70,32 @@ object Companies : IntIdTable() {
     val resultat3 = long("resultat_3").nullable()
 
     val secteurActivite = varchar("secteur_activite", 255).nullable()
+
+    val phone = varchar("phone", 255).nullable()
+    val website = varchar("website", 255).nullable()
+    val reviews = varchar("reviews", 50000).nullable()
+    val schedule = varchar("schedule", 1000).nullable()
+    val instagram = varchar("instagram", 255).nullable()
+    val facebook = varchar("facebook", 255).nullable()
+    val twitter = varchar("twitter", 255).nullable()
+    val linkedin = varchar("linkedin", 255).nullable()
+    val youtube = varchar("youtube", 255).nullable()
+    val email = varchar("email", 255).nullable()
+    val dateOfScrapping = date("date_of_scrapping").nullable()
+
+    /*
+    companyEntity.phone,
+                companyEntity.website,
+                companyEntity.reviews,
+                companyEntity.schedule,
+                companyEntity.instagram,
+                companyEntity.facebook,
+                companyEntity.twitter,
+                companyEntity.linkedin,
+                companyEntity.youtube,
+                companyEntity.email,
+                companyEntity.dateOfScrapping,
+     */
 }
 
 class CompanyEntity(id: EntityID<Int>) : IntEntity(id) {
@@ -139,6 +165,18 @@ class CompanyEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var secteurActivite by Companies.secteurActivite
 
+    var phone by Companies.phone
+    var website by Companies.website
+    var reviews by Companies.reviews
+    var schedule by Companies.schedule
+    var instagram by Companies.instagram
+    var facebook by Companies.facebook
+    var twitter by Companies.twitter
+    var linkedin by Companies.linkedin
+    var youtube by Companies.youtube
+    var email by Companies.email
+    var dateOfScrapping by Companies.dateOfScrapping
+
     override fun toString(): String {
         return super.toString()
     }
@@ -207,7 +245,19 @@ class CompanyEntity(id: EntityID<Int>) : IntEntity(id) {
         CA3,
         resultat3,
 
-        secteurActivite
+        secteurActivite,
+
+        phone,
+        website,
+        reviews,
+        schedule,
+        instagram,
+        facebook,
+        twitter,
+        linkedin,
+        youtube,
+        email,
+        dateOfScrapping
     )
 }
 
@@ -275,5 +325,17 @@ data class Company(
     val CA3: Long?,
     val resultat3: Long?,
 
-    val secteurActivite: String?
+    val secteurActivite: String?,
+
+    val phone: String?,
+    val website: String?,
+    val reviews: String?,
+    val schedule: String?,
+    val instagram: String?,
+    val facebook: String?,
+    val twitter: String?,
+    val linkedin: String?,
+    val youtube: String?,
+    val email: String?,
+    val dateOfScrapping: LocalDate?
 )
