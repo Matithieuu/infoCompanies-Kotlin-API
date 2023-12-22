@@ -181,7 +181,8 @@ class CompanyEntity(id: EntityID<Int>) : IntEntity(id) {
         return super.toString()
     }
 
-    fun toCompany() = Company(
+    fun
+            toCompany() = Company(
         id.value,
         denomination,
         siren,
