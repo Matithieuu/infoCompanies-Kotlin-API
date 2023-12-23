@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.data.Companies
+import com.example.data.StripeUsers
 import com.example.data.Users
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -33,6 +34,7 @@ private fun createTables() {
     transaction {
         SchemaUtils.create(Companies)
         SchemaUtils.create(Users)
+        SchemaUtils.create(StripeUsers)
     }
 }
 

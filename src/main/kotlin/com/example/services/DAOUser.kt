@@ -1,6 +1,7 @@
 package com.example.services
 
 import com.example.data.*
+import com.stripe.model.Customer
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -15,9 +16,13 @@ class DAOUser  {
                 userEntity.name,
                 userEntity.email,
                 userEntity.password,
-                userEntity.address,
                 userEntity.phone,
-                userEntity.refreshToken
+                userEntity.city,
+                userEntity.address,
+                userEntity.role,
+                userEntity.provider,
+                userEntity.refreshToken,
+                userEntity.stripe_id
             )
         }
 
@@ -27,19 +32,29 @@ class DAOUser  {
             }
         }
 
-       fun findOrCreateUser(user: UserInfo): User = transaction {
+        fun findOrCreateUser(user: User): User = transaction {
             val userEntity = UserEntity.find { Users.email eq user.email }.firstOrNull()
+            val stripeUser = DAOStripeUser.findOrCreateStripeUser(user)
             if (userEntity == null) {
+                // Create a new UserEntity and potentially a new StripeUserEntity
                 val newUserEntity = UserEntity.new {
-                    this.name = name
-                    this.email = email
-                    this.password = password
-                    this.address = address
-                    this.phone = phone
-                    this.refreshToken = refreshToken
+                    this.name = user.name
+                    this.email = user.email
+                    this.password = user.password
+                    this.city = user.city
+                    this.address = user.address
+                    this.phone = user.phone
+                    this.role = user.role
+                    this.provider = user.provider
+                    this.refreshToken = user.refreshToken
+                    this.stripe_id = stripeUser.id
                 }
                 transformEntityToUser(newUserEntity)
             } else {
+                // Update the existing UserEntity with the new Stripe ID
+                Users.update({ Users.email eq user.email }) {
+                    it[Users.stripe_id] = stripeUser.id
+                }
                 transformEntityToUser(userEntity)
             }
         }
@@ -61,6 +76,7 @@ class DAOUser  {
                 it[address] = user.address
                 it[phone] = user.phone
                 it[refreshToken] = user.refreshToken
+                it[stripe_id] = user.stripe_id
             }
         }
 
@@ -82,6 +98,16 @@ class DAOUser  {
 
         fun getEmailByRefreshToken(refreshToken: String) = transaction {
             Users.select { Users.refreshToken eq refreshToken }.map { it[Users.email] }.firstOrNull()
+        }
+
+        fun getStripeID(user: User): Int? = transaction {
+            Users.select { Users.id eq user.id }.map { it[Users.stripe_id] }.firstOrNull()
+        }
+
+        fun updateForeignKeyOfUser(user: User, stripe_id: Int) = transaction {
+            Users.update({ Users.id eq user.id }) {
+                it[Users.stripe_id] = stripe_id
+            }
         }
     }
 }

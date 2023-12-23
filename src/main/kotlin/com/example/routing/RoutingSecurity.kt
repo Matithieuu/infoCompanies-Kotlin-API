@@ -29,9 +29,9 @@ fun Application.configureOAuthRoutes(httpClient: HttpClient = applicationHttpCli
                         headers {
                             append(HttpHeaders.Authorization, "Bearer ${principal.accessToken}")
                         }
-                    }.body()
+                    }.body() ?: throw Exception("Cannot get user info")
 
-                    findOrCreateUser(userInfo)
+                    // TODO: create an user
 
                     call.sessions.set(
                         UserSessionOAuth(
