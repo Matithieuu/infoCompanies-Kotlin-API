@@ -1,4 +1,7 @@
 # infoCompanies-API
+
+# Switch to Spring Boot. Not updated
+
 Sur linux: 
 export GOOGLE_CLIENT_ID=yourClientId
 
